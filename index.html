@@ -13,11 +13,21 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      padding: 20px 10px;
+      padding: 30px 15px;
       position: relative;
       overflow-x: hidden;
-      /* 沉浸式森林光影背景 */
-      background: radial-gradient(circle at 50% 30%, #528348 0%, #294e24 60%, #152b12 100%);
+      /* 載入 bg.jpg 背景圖片，並居中填滿 */
+      background: url('bg.jpg') no-repeat center center fixed;
+      background-size: cover;
+    }
+
+    /* 遮罩，確保背景不會過濃，讓文字保持極高清晰度 */
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.15);
+      z-index: 0;
     }
 
     /* 漂浮螢光粒子 Canvas */
@@ -31,45 +41,41 @@
       z-index: 1;
     }
 
-    /* 第一版質感：大圓角卡片與陰影 */
+    /* 中央白色圓角卡片 (與影片完全一致) */
     .container {
       position: relative;
       z-index: 2;
-      max-width: 600px;
+      max-width: 580px;
       width: 100%;
-      background: rgba(255, 255, 255, 0.96);
-      backdrop-filter: blur(12px);
-      padding: 30px 25px;
-      border-radius: 24px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25), 0 0 15px rgba(255, 255, 255, 0.2);
-      border: 1px solid rgba(255, 255, 255, 0.8);
+      background: #ffffff;
+      padding: 35px 30px;
+      border-radius: 20px;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
     }
 
-    /* 標題區域 */
-    h1 { color: #2e7d32; text-align: center; font-size: 22px; font-weight: 700; margin-bottom: 8px; }
-    p.intro { color: #666; text-align: center; font-size: 13.5px; margin-bottom: 25px; }
+    /* 標題與副標題 */
+    .header-area { text-align: center; margin-bottom: 25px; }
+    h1 { color: #2d5a27; font-size: 22px; font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    p.subtitle { color: #668361; font-size: 13.5px; font-weight: 500; }
 
-    /* 第一版問題框樣式：柔和淺灰框、大圓角 */
+    /* 題目卡片 */
     .question-card {
       background: #fafafa;
-      border: 1px solid #eee;
-      border-radius: 16px;
+      border: 1px solid #eeeeee;
+      border-radius: 14px;
       padding: 18px;
-      margin-bottom: 20px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+      margin-bottom: 18px;
     }
-    .question-title { font-weight: 600; margin-bottom: 12px; font-size: 15px; color: #1b5e20; line-height: 1.5; }
+    .question-title { font-size: 15px; font-weight: 600; color: #1b5e20; margin-bottom: 12px; line-height: 1.5; }
     .options { display: flex; flex-direction: column; gap: 8px; }
-    
-    /* 第一版選項按鈕樣式 */
     .option-btn {
-      padding: 12px 15px;
-      border: 1px solid #ccc;
-      border-radius: 10px;
-      background: white;
+      padding: 11px 14px;
+      border: 1px solid #dcdcdc;
+      border-radius: 8px;
+      background: #ffffff;
       text-align: left;
       cursor: pointer;
-      font-size: 14px;
+      font-size: 13.5px;
       color: #333;
       transition: all 0.2s ease;
     }
@@ -77,50 +83,256 @@
       background: #e8f5e9;
       border-color: #4caf50;
       color: #2e7d32;
-      font-weight: bold;
-      box-shadow: 0 2px 6px rgba(76, 175, 80, 0.2);
+      font-weight: 700;
     }
 
-    /* 第一版綠色主提交按鈕 */
+    /* 提交按鈕 */
     #submit-btn {
       width: 100%;
       padding: 15px;
-      background: #2e7d32;
+      background: #3c6e38;
       color: white;
       border: none;
-      border-radius: 12px;
-      font-size: 17px;
-      font-weight: bold;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 700;
       cursor: pointer;
       margin-top: 10px;
-      transition: background 0.2s;
     }
-    #submit-btn:hover { background: #1b5e20; }
-    #submit-btn:disabled { background: #ccc; cursor: not-allowed; }
+    #submit-btn:disabled { background: #cccccc; cursor: not-allowed; }
 
-    /* 結果頁面 */
+    /* 測驗完成結果頁面 (1:1 復刻影片樣式) */
     #result-area { display: none; text-align: center; }
-    .complete-badge { font-size: 20px; font-weight: 700; color: #2e7d32; margin-bottom: 15px; }
-    .score-label { font-size: 13.5px; color: #555; margin-bottom: 5px; }
-    .score-num { font-size: 36px; font-weight: 800; color: #e07a5f; margin-bottom: 15px; }
-    .mushroom-type-title { font-size: 20px; font-weight: 700; color: #2e7d32; margin-bottom: 15px; }
-    .mushroom-desc { font-size: 14px; color: #444; line-height: 1.6; text-align: left; margin-bottom: 20px; background: #f1f8e9; padding: 15px; border-radius: 12px; }
+    .complete-badge { font-size: 20px; font-weight: 700; color: #2c3e50; margin-bottom: 15px; }
+    .score-label { font-size: 13.5px; color: #555555; margin-bottom: 8px; }
+    .score-num { font-size: 38px; font-weight: 800; color: #e07a5f; margin-bottom: 18px; }
+    
+    .mushroom-type-title { font-size: 20px; font-weight: 700; color: #2d5a27; margin-bottom: 15px; }
+    .mushroom-desc { font-size: 13.5px; color: #444444; line-height: 1.6; text-align: left; margin-bottom: 22px; }
 
-    /* 建議服務框 (橙紅色虛線框) */
+    /* 建議服務橙紅色虛線框 */
     .referral-box {
-      background: #fff8f5;
+      background: #fffafa;
       border: 1.5px dashed #f2a68d;
-      border-radius: 14px;
+      border-radius: 12px;
       padding: 16px;
       text-align: left;
-      margin-bottom: 20px;
+      margin-bottom: 22px;
     }
-    .referral-title { color: #e07a5f; font-weight: 700; font-size: 14.5px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
-    .referral-item { font-size: 13.5px; color: #555; line-height: 1.5; }
-    .referral-item strong { color: #2e7d32; display: block; margin-top: 4px; }
+    .referral-title { color: #e07a5f; font-weight: 700; font-size: 14.5px; margin-bottom: 8px; }
+    .referral-item { font-size: 13px; color: #444444; line-height: 1.6; }
+    .referral-item strong { color: #2c3e50; display: block; margin-top: 4px; margin-bottom: 2px; }
 
+    /* 重新測驗墨綠色按鈕 */
     .restart-btn {
       padding: 10px 24px;
-      background: #4a6b46;
+      background: #466b5d;
       color: white;
       border: none;
+      border-radius: 8px;
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+<!-- 漂浮螢光光點 Canvas -->
+<canvas id="particle-canvas"></canvas>
+
+<div class="container">
+  <!-- 題目區塊 -->
+  <div id="quiz-area">
+    <div class="header-area">
+      <h1>🍄 森林心靈菇菇生態測驗</h1>
+      <p class="subtitle">14 題 WEMWBS 探索你的內在狀態與同行夥伴</p>
+    </div>
+    <div id="questions-container"></div>
+    <button id="submit-btn" onclick="submitQuiz()" disabled>完成測驗，查看菇菇結果</button>
+  </div>
+
+  <!-- 結果區塊 (影片畫面) -->
+  <div id="result-area">
+    <div class="header-area">
+      <h1>🍄 森林心靈菇菇生態測驗</h1>
+      <p class="subtitle">14 題 WEMWBS 探索你的內在狀態與同行夥伴</p>
+    </div>
+
+    <div class="complete-badge">🎉 測驗完成！</div>
+    <div class="score-label">你的心理養分指數 (WEMWBS 總分)：</div>
+    <div class="score-num" id="result-score">70 / 70</div>
+
+    <div class="mushroom-type-title">你的菇菇類型：✨ <span id="result-title">夜光菇 (微光型)</span></div>
+    
+    <div class="mushroom-desc" id="result-desc">
+      特質：低谷微光、逆境韌性、溫暖他人、內在暖意。即使身處低谷，內心依然有一股不服輸的暖意。
+    </div>
+
+    <div class="referral-box">
+      <div class="referral-title">🤝 建議尋找的【同行菇】與服務：</div>
+      <div class="referral-item" id="result-service">
+        ❤️ <strong>【社】藝術義工培訓</strong>
+        將自己的微光轉化為力量，關懷社區有需要的人，照亮自己與他人。
+      </div>
+    </div>
+
+    <button class="restart-btn" onclick="location.reload()">重新測驗</button>
+  </div>
+</div>
+
+<script>
+  // ⚠️ 請確保填入你之前授權好的 Google Apps Script 網址 ⚠️
+  const GOOGLE_SCRIPT_URL = "YOUR_GOOGLE_APP_SCRIPT_WEBHOOK_URL";
+
+  const questions = [
+    "1. 晨光初露，你在森林微風中醒來，感到充滿希望？",
+    "2. 遇到了難解的樹藤迷宮，你依然覺得自己有用處、能找到出路？",
+    "3. 身邊的溪流與花草讓你感到放鬆與平靜？",
+    "4. 你對森林深處未知的植物與故事充滿好奇？",
+    "5. 你有足夠的養分（精力）去面對小動物們的求助？",
+    "6. 面對複雜的森林地形，你能清晰思考並做出決定？",
+    "7. 你滿意現在作為一朵菇菇的生長狀態？",
+    "8. 你覺得自己與這片森林及其他夥伴貼近、有連結？",
+    "9. 你對自己的優點與獨特性感到自信？",
+    "10. 在森林小鎮裡，你覺得自己果斷、有決定力？",
+    "11. 你感到自己深受森林夥伴們的喜愛？",
+    "12. 你對探索森林的新領域、新想法感到有興趣？",
+    "13. 遇到陰雨天時，你依然能感到心情愉快？",
+    "14. 你喜歡現在這個獨一無二的自己？"
+  ];
+
+  const mushroomProfiles = [
+    { min: 14, max: 20, title: "休眠苔蘚菇", desc: "特質：靜謐休養、積蓄能量。你現在處於需要好休息的階段，不必急著冒芽發光。", service: "❤️ <strong>【心理】1對1心靈陪伴傾訴服務</strong>將給予你安全的空間與傾聽，陪伴你度過休眠期。" },
+    { min: 21, max: 26, title: "渴望陽光菇", desc: "特質：尋求突破、伸展葉片。你渴望獲得養分與突破，正努力向著光生長。", service: "❤️ <strong>【成長】情緒壓力管理工作坊</strong>學習自我照顧技巧，獲取向上生長的養分。" },
+    { min: 27, max: 32, title: "夜光菇 (微光型)", desc: "特質：低谷微光、逆境韌性、溫暖他人、內在暖意。即使身處低谷，內心依然有一股不服輸的暖意。", service: "❤️ <strong>【社】藝術義工培訓</strong>將自己的微光轉化為力量，關懷社區有需要的人，照亮自己與他人。" },
+    { min: 33, max: 38, title: "平衡木耳菇", desc: "特質：穩重沉著、適應力強。你擁有良好的適應力，在森林中默默保持平衡。", service: "❤️ <strong>【身心】森林正念漫步小組</strong>保持內心平衡，深化對身心狀態的察覺。" },
+    { min: 39, max: 44, title: "溫馨茶樹菇", desc: "特質：溫暖安心、可靠陪伴。你是森林裡溫暖的存在，讓人感到很放鬆。", service: "❤️ <strong>【社交】同行者社區交流茶座</strong>結識志同道合的夥伴，彼此分享與支持。" },
+    { min: 45, max: 50, title: "靜謐松露菇", desc: "特質：內涵豐富、深沉智慧。你的內心世界極其豐富，蘊含著深厚的力量。", service: "❤️ <strong>【探索】深度自我探索工作坊</strong>梳理內在資源，發掘潛藏的生命天賦。" },
+    { min: 51, max: 56, title: "活力香菇", desc: "特質：熱情洋溢、探索新事物。你充滿活力，總是準備好接納新鮮有趣的體驗。", service: "❤️ <strong>【體驗】戶外生態探索義工團</strong>將活力發揮在自然保護與社區活動中。" },
+    { min: 57, max: 61, title: "璀璨螢光菇", desc: "特質：照亮他人、自信散發。你的心理養分充足，能在夜空下綻放耀眼光芒。", service: "❤️ <strong>【培育】同行菇心靈大使培訓</strong>成為別人的指路明燈，傳遞正面能量。" },
+    { min: 62, max: 66, title: "森林守護大將菇", desc: "特質：堅韌可靠、遮風擋雨。你內心非常強大，能為其他小夥伴提供庇護。", service: "❤️ <strong>【領導】社區互助網絡小組組長</strong>帶領社區團隊，共建互相扶持的健康森林。" },
+    { min: 67, max: 70, title: "蓬勃盛開金菇", desc: "特質：生命力爆棚、極致 Flourishing。你處於極度蓬勃盛開的狀態，享受生命的美好！", service: "❤️ <strong>【分享】生命故事分享會嘉賓</strong>分享你的蓬勃心路歷程，賦能更多身邊的人。" }
+  ];
+
+  let answers = new Array(14).fill(0);
+
+  function renderQuestions() {
+    const container = document.getElementById("questions-container");
+    questions.forEach((q, index) => {
+      const card = document.createElement("div");
+      card.className = "question-card";
+      card.innerHTML = `
+        <div class="question-title">${q}</div>
+        <div class="options">
+          ${[1,2,3,4,5].map(score => `
+            <button class="option-btn" onclick="selectOption(${index},${score}, this)">
+              ${getScoreLabel(score)}
+            </button>
+          `).join('')}
+        </div>
+      `;
+      container.appendChild(card);
+    });
+  }
+
+  function getScoreLabel(score) {
+    const labels = ["1 - 完全不符合", "2 - 很少符合", "3 - 有時符合", "4 - 經常符合", "5 - 總是符合"];
+    return labels[score - 1];
+  }
+
+  function selectOption(qIndex, score, btn) {
+    answers[qIndex] = score;
+    const parent = btn.parentElement;
+    parent.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    
+    if (!answers.includes(0)) {
+      document.getElementById("submit-btn").disabled = false;
+    }
+  }
+
+  function submitQuiz() {
+    const totalScore = answers.reduce((a, b) => a + b, 0);
+    const profile = mushroomProfiles.find(p => totalScore >= p.min && totalScore <= p.max) || mushroomProfiles[0];
+
+    document.getElementById("quiz-area").style.display = "none";
+    document.getElementById("result-area").style.display = "block";
+    document.getElementById("result-score").innerText = `${totalScore} / 70`;
+    document.getElementById("result-title").innerText = profile.title;
+    document.getElementById("result-desc").innerText = profile.desc;
+    document.getElementById("result-service").innerHTML = profile.service;
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    const payload = {
+      timestamp: new Date().toLocaleString("zh-HK"),
+      totalScore: totalScore,
+      mushroomType: profile.title,
+      answers: answers.join(", ")
+    };
+
+    fetch(GOOGLE_SCRIPT_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    }).catch(err => console.log(err));
+  }
+
+  // 螢光光點動畫腳本
+  const canvas = document.getElementById('particle-canvas');
+  const ctx = canvas.getContext('2d');
+  let particles = [];
+
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
+
+  class Particle {
+    constructor() { this.reset(); }
+    reset() {
+      this.x = Math.random() * canvas.width;
+      this.y = Math.random() * canvas.height;
+      this.size = Math.random() * 3 + 1;
+      this.speedY = -(Math.random() * 0.7 + 0.2);
+      this.speedX = (Math.random() - 0.5) * 0.4;
+      this.alpha = Math.random() * 0.8 + 0.2;
+      this.fade = Math.random() * 0.008 + 0.004;
+    }
+    update() {
+      this.y += this.speedY;
+      this.x += this.speedX;
+      this.alpha -= this.fade;
+      if (this.alpha <= 0 || this.y < 0) {
+        this.reset();
+        this.y = canvas.height + 10;
+      }
+    }
+    draw() {
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255, 255, 200, ${this.alpha})`;
+      ctx.shadowBlur = 8;
+      ctx.shadowColor = "rgba(255, 255, 150, 0.9)";
+      ctx.fill();
+    }
+  }
+
+  for (let i = 0; i < 50; i++) { particles.push(new Particle()); }
+
+  function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles.forEach(p => { p.update(); p.draw(); });
+    requestAnimationFrame(animate);
+  }
+  animate();
+
+  renderQuestions();
+</script>
+
+</body>
+</html>
