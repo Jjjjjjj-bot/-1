@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>森林心靈菇菇生態測驗 (WEMWBS 14題完整版)</title>
+    <style>
+        :root {
+            --primary-color: #4a6b5d;
+            --bg-color: #f4f7f4;
+            --card-bg: #ffffff;
+            --accent-color: #e07a5f;
+            --text-color: #2b2d42;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+        }
+
+        h1 {
+            color: var(--primary-color);
+            text-align: center;
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            text-align: center;
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background-color: #e0e0e0;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .progress {
+            height: 100%;
+            width: 0%;
+            background-color: var(--primary-color);
+            transition: width 0.3s ease;
+        }
+
+        .question-card {
+            display: none;
+        }
+
+        .question-card.active {
+            display: block;
+        }
+
+        .question-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+
+        .scenario {
+            background-color: #f9fbf9;
+            padding: 12px;
+            border-left: 4px solid var(--primary-color);
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-size: 0.95rem;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option-btn {
+            background: white;
+            border: 2px solid #e2e8f0;
+            padding: 12px 15px;
+            border-radius: 8px;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.9rem;
+        }
+
+        .option-btn:hover {
+            border-color: var(--primary-color);
+            background-color: #f0f4f2;
+        }
+
+        .btn-group {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .nav-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            background-color: #ccc;
+            color: white;
+        }
+
+        .result-card {
+            display: none;
+            text-align: center;
+        }
+
+        .result-score {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--accent-color);
+            margin: 10px 0;
+        }
+
+        .mushroom-title {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .service-box {
+            background: #fdf6f0;
+            border: 1px dashed var(--accent-color);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🍄 森林心靈菇菇生態測驗</h1>
+    <div class="subtitle">14 題 WEMWBS 探索你的內在狀態與同行夥伴</div>
+
+    <div id="quiz-section">
+        <div class="progress-bar">
+            <div class="progress" id="progress"></div>
+        </div>
+
+        <div id="questions-container"></div>
+
+        <div class="btn-group">
+            <button class="nav-btn" id="prev-btn" onclick="prevQuestion()" disabled>上一題</button>
+            <span id="page-num" style="align-self: center; font-size: 0.85rem; color:#777;">1 / 14</span>
+        </div>
+    </div>
+
+    <div class="result-card" id="result-section">
+        <h2>🎉 測驗完成！</h2>
+        <div>你的心理養分指數 (WEMWBS 總分)：</div>
+        <div class="result-score" id="total-score">0 / 70</div>
+
+        <div class="mushroom-title" id="mushroom-name">分析中...</div>
+        <p id="mushroom-desc" style="text-align: left; font-size: 0.95rem;"></p>
+
+        <div class="service-box">
+            <h3 style="margin-top:0; color: var(--accent-color);">🤝 建議尋找的【同行菇】與服務：</h3>
+            <div id="companion-info"></div>
+        </div>
+
+        <button onclick="location.reload()" style="margin-top: 20px; padding: 10px 20px; background: var(--primary-color); color: white; border: none; border-radius: 6px; cursor: pointer;">重新測驗</button>
+    </div>
+</div>
+
+<script>
+    // Google Form / Sheets 接收 URL (請替換為你的 Google App Script Webhook URL)
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxPboMfvFFOP9EO6_dNrCMdT1O7z_LY_bemNcU7yLt6XpApFSyGF0bifn8Bzv4-PoGm/exec";
+
+    const questions = [
+        {
+            title: "【第 1 題：對未來的期待】",
+            scenario: "森林裡的季節正在交替，看著未知的下一個季節，這陣子你的孢子與內在狀態是？",
+            options: [
+                { text: "1分：完全提不起勁，覺得未來的環境只會更混亂與灰暗。", score: 1 },
+                { text: "2分：偶爾會擔心變數太多，不太敢對未來的變化有太多期待。", score: 2 },
+                { text: "3分：順其自然吧，走一步算一步，沒有特別好也沒有特別壞。", score: 3 },
+                { text: "4分：蠻期待接下來的變化，覺得會有新的可能性在等著我。", score: 4 },
+                { text: "5分：充滿希望！迫不及待想看看未來的生命會開出什麼風景。", score: 5 }
+            ]
+        },
+        {
+            title: "【第 2 題：自我價值與有用感】",
+            scenario: "在整片森林生態系裡面，你最近常覺得自己扮演著什麼樣的角色？",
+            options: [
+                { text: "1分：覺得自己可有可無，好像只是在消耗養分、原地打轉。", score: 1 },
+                { text: "2分：很少覺得自己很重要，每天只是重複做著日常瑣事。", score: 2 },
+                { text: "3分：有時能幫上周遭植物的忙，覺得自己還算有一點用處。", score: 3 },
+                { text: "4分：經常能照顧身邊的人或社群，為周遭帶來溫暖與支援。", score: 4 },
+                { text: "5分：覺得自己非常有價值與影響力，能成為別人的光與養分！", score: 5 }
+            ]
+        },
+        {
+            title: "【第 3 題：輕鬆與放鬆感】",
+            scenario: "當夜晚降臨森林、安靜下來時，你的心靈菌絲與狀態能感到放鬆嗎？",
+            options: [
+                { text: "1分：緊繃到極點，硬殼非常堅硬，完全無法放鬆休息。", score: 1 },
+                { text: "2分：耳朵和腦袋塞滿了各種負擔與噪音，很難沉澱下來。", score: 2 },
+                { text: "3分：有時可以放鬆，但遇到事情還是會陷入焦慮。", score: 3 },
+                { text: "4分：經常能找到屬於自己的安靜角落，感覺挺悠閒自在。", score: 4 },
+                { text: "5分：內心非常平靜充實，隨時都能在森林裡自在地呼吸。", score: 5 }
+            ]
+        },
+        {
+            title: "【第 4 題：對他人的興趣與好奇】",
+            scenario: "面對周遭其他種類的植物或新來到森林的夥伴，你最近對他們的故事感興趣嗎？",
+            options: [
+                { text: "1分：完全沒興趣，甚至想把自己的菌絲收起來，拒絕任何接觸。", score: 1 },
+                { text: "2分：生活在極少數的圈子裡，很少主動去關注別人的事情。", score: 2 },
+                { text: "3分：有時會聽聽別人的近況，維持基本的友好社交。", score: 3 },
+                { text: "4分：經常對不同人的故事感到好奇，樂意去認識新朋友。", score: 4 },
+                { text: "5分：充滿熱情與連結欲！很想張開網去擁抱與探索大家的世界。", score: 5 }
+            ]
+        },
+        {
+            title: "【第 5 題：足夠的心理能量】",
+            scenario: "處理完日常的雨水與養分吸收（日常工作 / 家務 / 照顧責任）後，你覺得自己還有額外精力嗎？",
+            options: [
+                { text: "1分：精疲力竭，感覺內在養分被徹底抽乾，完全沒有餘裕。", score: 1 },
+                { text: "2分：能量所剩無幾，只能勉強維持日常的基本運作。", score: 2 },
+                { text: "3分：還有剛剛好的能量，可以應付生活，但不能再多了。", score: 3 },
+                { text: "4分：精力算充沛，完工後還有餘力發展自己的興趣或創作。", score: 4 },
+                { text: "5分：活力滿滿！內在充滿源源不絕的能量，甚至能去照亮與幫助他人。", score: 5 }
+            ]
+        },
+        {
+            title: "【第 6 題：應對問題的信心與能力】",
+            scenario: "當森林突然遇到暴風雨或壞天氣（面臨突如其來的生活壓力 / 轉折）時：",
+            options: [
+                { text: "1分：覺得完全招架不住，整個人陷在混亂與無措之中。", score: 1 },
+                { text: "2分：會感到很混亂，需要花很久的時間才能勉強反應過來。", score: 2 },
+                { text: "3分：雖然過程有點辛苦，但多數時候還是能一步一步應付。", score: 3 },
+                { text: "4分：能冷靜思考，從轉折與挑戰中找到解決問題的方法。", score: 4 },
+                { text: "5分：充滿逆境韌性！即使在最深的黑夜裡也能發揮不服輸的力量。", score: 5 }
+            ]
+        },
+        {
+            title: "【第 7 題：思緒清晰度】",
+            scenario: "這陣子面對各種生活的選擇與思考課題，你覺得自己的思緒狀態比較像：",
+            options: [
+                { text: "1分：一片混亂，就像被濃濃的森林大霧包圍，完全轉不開。", score: 1 },
+                { text: "2分：常常三心二意、被別人的聲音干擾，拿不定主意。", score: 2 },
+                { text: "3分：大部分時候算清晰，偶爾會陷入短暫的迷惘。", score: 3 },
+                { text: "4分：思緒蠻條理分明的，知道自己在處理什麼事情。", score: 4 },
+                { text: "5分：非常清晰敏銳！對自己的生命方向與思考很有洞察力。", score: 5 }
+            ]
+        },
+        {
+            title: "【第 8 題：自我滿意度】",
+            scenario: "靜靜看著自己在森林裡長成的模樣（當前的自己），你內心對自己的感受是？",
+            options: [
+                { text: "1分：常常覺得自己不夠好、否定自己，對現狀感到失望。", score: 1 },
+                { text: "2分：偶爾會羨慕別的植物，覺得自己長得很平庸乏味。", score: 2 },
+                { text: "3分：覺得自己就這樣吧，談不上特別喜歡，但也能接受。", score: 3 },
+                { text: "4分：蠻欣賞自己的獨特性，知道自己有不可替代的優點。", score: 4 },
+                { text: "5分：非常喜歡與接納現在的自己，覺得每一個階段都是獨特風景。", score: 5 }
+            ]
+        },
+        {
+            title: "【第 9 題：人際親近與連結感】",
+            scenario: "關於你和周遭其他森林夥伴（家人、朋友、身邊人）的連結，你覺得貼近嗎？",
+            options: [
+                { text: "1分：極度孤立無援，覺得雖然身處森林，但完全沒有人真正懂我。", score: 1 },
+                { text: "2分：生活在自己的小圈子裡，很少能與人產生深層、真實的連結。", score: 2 },
+                { text: "3分：有幾個相處得來的朋友，維持著平平淡淡的日常關係。", score: 3 },
+                { text: "4分：身邊有可以依靠、互相扶持且關係緊密的陪伴者。", score: 4 },
+                { text: "5分：覺得充滿愛與連結，能很溫暖地擁抱與融進周遭的世界。", score: 5 }
+            ]
+        },
+        {
+            title: "【第 10 題：自信心】",
+            scenario: "要在森林裡展現自己的特質、獨立站立面對大家時，你內心感到有自信嗎？",
+            options: [
+                { text: "1分：充滿自卑與不安，總想把自己藏在樹陰底下不被看見。", score: 1 },
+                { text: "2分：不太有自信，很介意別人的眼光與看法。", score: 2 },
+                { text: "3分：在熟悉的小領域裡有自信，遇到新環境會有點縮縮不前。", score: 3 },
+                { text: "4分：有自己的堅持與底氣，相信自己的特質與能力。", score: 4 },
+                { text: "5分：非常有自信！相信自己的生命潛能比想像中更豐富。", score: 5 }
+            ]
+        },
+        {
+            title: "【第 11 題：自我決策能力】",
+            scenario: "決定自己要往哪個方向生長（做人生大小決策 / 為自己做主）時：",
+            options: [
+                { text: "1分：完全無法做決定，總是被別人的期待或照顧責任拖著走。", score: 1 },
+                { text: "2分：非常依賴身邊的人，容易受情感牽絆而搖擺不定。", score: 2 },
+                { text: "3分：日常小事可以自己做主，但遇到重大抉擇還是會猶豫不決。", score: 3 },
+                { text: "4分：有獨立思考的能力，能清晰地為自己的選擇負責。", score: 4 },
+                { text: "5分：非常堅定！很清楚自己想要什麼，能獨立為自己的生命做主。", score: 5 }
+            ]
+        },
+        {
+            title: "【第 12 題：感受被愛的程度】",
+            scenario: "在日常生活中，你有感受到自己正被周遭的世界或某些人溫柔地愛著、珍視著嗎？",
+            options: [
+                { text: "1分：完全感受不到愛與關懷，覺得自己總是一個人孤軍奮戰。", score: 1 },
+                { text: "2分：很少感受到被重視，常常覺得自己付出的比收穫的多。", score: 2 },
+                { text: "3分：偶爾能感受到家人的愛，但日常生活中感受不深。", score: 3 },
+                { text: "4分：經常能感受到身邊的人對自己的關心與呵護。", score: 4 },
+                { text: "5分：深刻感受到自己被愛與被珍惜，內心隨時都被溫柔滋養著。", score: 5 }
+            ]
+        },
+        {
+            title: "【第 13 題：對新事物/學習的興趣】",
+            scenario: "對於探索森林未知的區域、嘗試未曾體驗過的事情（學習新技能 / 體驗創作），你有興趣嗎？",
+            options: [
+                { text: "1分：毫無興趣，生活已經夠累了，完全不想有任何改變。", score: 1 },
+                { text: "2分：習慣待在舒適圈，對新事物有一點排斥與顧慮。", score: 2 },
+                { text: "3分：如果有朋友帶領，會願意順便嘗試看看。", score: 3 },
+                { text: "4分：蠻有興趣的，喜歡在生活中加入一點手藝、音樂或新體驗。", score: 4 },
+                { text: "5分：興致勃勃！內心藏著豐富的情感與創作欲，極度渴望探索新事物。", score: 5 }
+            ]
+        },
+        {
+            title: "【第 14 題：愉悅與開朗的心情】",
+            scenario: "回想最近這段時間的整體心情狀態，你常感到心情愉快、開朗嗎？",
+            options: [
+                { text: "1分：心情極度鬱悶低落，壓迫感很大，很久沒有開心過了。", score: 1 },
+                { text: "2分：常常覺得悶悶不樂，生活有些乏味與迷惘。", score: 2 },
+                { text: "3分：喜憂參半，心情隨著當天發生的事情起伏。", score: 3 },
+                { text: "4分：經常能感到輕鬆愉快，可以在日常中找到樂趣。", score: 4 },
+                { text: "5分：非常開朗愉快！隨時都能把歡笑與溫暖帶給身邊的人。", score: 5 }
+            ]
+        }
+    ];
+
+    let currentQ = 0;
+    let answers = new Array(questions.length).fill(0);
+
+    function initQuiz() {
+        const container = document.getElementById('questions-container');
+        questions.forEach((q, idx) => {
+            const card = document.createElement('div');
+            card.className = `question-card ${idx === 0 ? 'active' : ''}`;
+            card.id = `q-${idx}`;
+
+            card.innerHTML = `
+                <div class="question-title">${q.title}</div>
+                <div class="scenario">${q.scenario}</div>
+                <div class="options">
+                    ${q.options.map((opt) => `
+                        <button class="option-btn" onclick="selectOption(${idx}, ${opt.score})">${opt.text}</button>
+                    `).join('')}
+                </div>
+            `;
+            container.appendChild(card);
+        });
+        updateUI();
+    }
+
+    function selectOption(qIdx, score) {
+        answers[qIdx] = score;
+        if (currentQ < questions.length - 1) {
+            currentQ++;
+            updateUI();
+        } else {
+            calculateResult();
+        }
+    }
+
+    function prevQuestion() {
+        if (currentQ > 0) {
+            currentQ--;
+            updateUI();
+        }
+    }
+
+    function updateUI() {
+        document.querySelectorAll('.question-card').forEach((card, idx) => {
+            card.classList.toggle('active', idx === currentQ);
+        });
+        document.getElementById('prev-btn').disabled = currentQ === 0;
+        document.getElementById('page-num').innerText = `${currentQ + 1} / ${questions.length}`;
+        document.getElementById('progress').style.width = `${((currentQ + 1) / questions.length) * 100}%`;
+    }
+
+    function calculateResult() {
+        const total = answers.reduce((a, b) => a + b, 0);
+        document.getElementById('quiz-section').style.display = 'none';
+        document.getElementById('result-section').style.display = 'block';
+        document.getElementById('total-score').innerText = `${total} / 70`;
+
+        let mushroom = "";
+        let desc = "";
+        let companion = "";
+
+        if (total <= 18) {
+            mushroom = "👂 木耳 (傾聽型)";
+            desc = "特質：情緒垃圾、過度傾聽、耳沉心重、渴望清空。你吸收了太多人的負面情緒，耳朵需要清空一下了。";
+            companion = "<b>🕊️【找】藝術治療 / 照顧者舒壓</b><br>你需要一雙溫柔的耳朵，專注聽你講述自己的故事，透過創作清空心靈垃圾。";
+        } else if (total <= 23) {
+            mushroom = "🪵 靈芝 (修復型)";
+            desc = "特質：堅韌防禦、默承受壓、外硬內柔、自我忘懷。最近的你默默承受許多壓力，照顧身邊人卻忘了照顧自己。";
+            companion = "<b>🫖【家】照顧者舒壓工作坊</b><br>給自己一段純粹放鬆的喘息時間，你有保護別人的硬殼，但也需要被溫柔滋養。";
+        } else if (total <= 28) {
+            mushroom = "🌲 松茸 (獨特型)";
+            desc = "特質：堅持自我、獨來獨往、深層孤獨、渴望理解。習慣獨來獨往，內心有獨特的堅持，有時感到孤獨。";
+            companion = "<b>🕊️【找】藝術治療</b><br>在一對一或小組陪伴的安靜空間裡梳理內心情緒，你的獨特終會吸引懂得你的人。";
+        } else if (total <= 32) {
+            mushroom = "🍄 蘑菇 (日常型)";
+            desc = "特質：平淡重複、生活乏味、日常包容、渴望甜意。生活平平淡淡，重複著家務或工作，偶爾覺得乏味與迷惘。";
+            companion = "<b>🎨【找】多元藝術體驗</b><br>在日常中加一點手藝與音樂，平凡的日常裡，藝術能為你揉進一點甜與色彩。";
+        } else if (total <= 37) {
+            mushroom = "🥤 金針菇 (緊密型)";
+            desc = "特質：過度牽絆、渴望空間、情感黏著、關係疲憊。非常看重關係，但有時會因為太在乎而感到牽絆與疲憊。";
+            companion = "<b>👨‍👩‍👧‍👦【家】家庭與伴侶支援</b><br>靠得太緊容易窒息，適當的空間能讓愛更自由，找回舒壓的平衡。";
+        } else if (total <= 42) {
+            mushroom = "🔍 雞牌菇 (樸實型)";
+            desc = "特質：討好他人、忽視自我、團隊氛圍、隱藏真實。你是大家的幸運星與開心果，但有時會忽視自己真正的感受。";
+            companion = "<b>💬【社】朋輩支援與興趣班</b><br>結識志同道合的新朋友，照顧大家的同時，別忘了問問自己：今天開心嗎？為自己而創作。";
+        } else if (total <= 47) {
+            mushroom = "💡 猴頭菇 (思考型)";
+            desc = "特質：人生轉折、迷惘探索、深層思考、成長養分。正處於人生轉折期，腦海裡有很多對未來的思考與探索。";
+            companion = "<b>🌱【找】生命教育</b><br>探索生涯規劃與自我認識，思考是成長的養分，每個階段都有獨特風景。";
+        } else if (total <= 52) {
+            mushroom = "☂️ 竹笙 (連結型)";
+            desc = "特質：圈子受限、渴望連結、擁抱世界、跨界共融。渴望走出固有的生活圈，認識不同年代或背景的人。";
+            companion = "<b>👴👶【社】跨時代共融活動</b><br>張開擁抱世界的網，以藝術為橋，促進不同年齡層的交流與連結。";
+        } else if (total <= 61) {
+            mushroom = "🌐 雲芝 (多彩型)";
+            desc = "特質：靈感壓抑、渴望綻放、生活繁瑣、潛能待發。內心藏著豐富的情感與創作欲，生命不只一種顏色。";
+            companion = "<b>🎨【找】多元藝術體驗</b><br>透過視覺藝術、音樂或寫作遇見不一樣的自己，你的潛能比想像中更豐富。";
+        } else {
+            mushroom = "✨ 夜光菇 (微光型)";
+            desc = "特質：低谷微光、逆境韌性、溫暖他人、內在暖意。即使身處低谷，內心依然有一股不服輸的暖意。";
+            companion = "<b>❤️【社】藝術義工培訓</b><br>將自己的微光轉化為力量，關懷社區有需要的人，照亮自己與他人。";
+        }
+
+        document.getElementById('mushroom-name').innerText = `你的菇菇類型：${mushroom}`;
+        document.getElementById('mushroom-desc').innerText = desc;
+        document.getElementById('companion-info').innerHTML = companion;
+
+        // 自動將數據送往 Google Sheets 備份
+        sendToGoogleSheets(total, mushroom);
+    }
+
+    function sendToGoogleSheets(totalScore, mushroomType) {
+        if (GOOGLE_SCRIPT_URL === "YOUR_GOOGLE_APP_SCRIPT_WEBHOOK_URL") return;
+
+        const data = {
+            timestamp: new Date().toLocaleString("zh-HK"),
+            totalScore: totalScore,
+            mushroomType: mushroomType,
+            answers: answers.join(",")
+        };
+
+        fetch(GOOGLE_SCRIPT_URL, {
+            method: "POST",
+            mode: "no-cors",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        }).catch(err => console.log("Data send error:", err));
+    }
+
+    initQuiz();
+</script>
+
+</body>
+</html>
