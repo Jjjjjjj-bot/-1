@@ -304,13 +304,13 @@
 <script>
     const GOOGLE_SCRIPT_URL = "YOUR_GOOGLE_APP_SCRIPT_WEBHOOK_URL";
 
-    // 🌟 WEMWBS 14 題官方標準中文原版題目與 5 分 Likert 量表 🌟
+    // 🌟 沃里克愛丁堡心理健康量表 (WEMWBS) 指定中文 5 分 Likert 選項 🌟
     const wemwbsStandardOptions = [
-        { text: "1分：從不 (None of the time)", score: 1 },
-        { text: "2分：很少 (Rarely)", score: 2 },
-        { text: "3分：有時 (Some of the time)", score: 3 },
-        { text: "4分：經常 (Often)", score: 4 },
-        { text: "5分：總是 (All of the time)", score: 5 }
+        { text: "1 分：完全沒有", score: 1 },
+        { text: "2 分：很少有", score: 2 },
+        { text: "3 分：有時有", score: 3 },
+        { text: "4 分：經常有", score: 4 },
+        { text: "5 分：總是有", score: 5 }
     ];
 
     const questions = [
@@ -368,7 +368,7 @@
 
             card.innerHTML = `
                 <div class="question-title">${q.title}</div>
-                <div class="scenario">「${q.scenario}」<br><span style="font-size:0.8rem; color:#666; font-weight:normal;">(請回想過去兩週內，這個描述符合你的頻率)</span></div>
+                <div class="scenario">「${q.scenario}」<br><span style="font-size:0.8rem; color:#666; font-weight:normal;">(請回想過去兩週內，這個描述符合你的情況)</span></div>
                 <div class="options">
                     ${q.options.map((opt) => `
                         <button class="option-btn" onclick="selectOption(${idx}, ${opt.score})">${opt.text}</button>
