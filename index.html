@@ -242,14 +242,25 @@
             font-size: 2.2rem;
             font-weight: 800;
             color: var(--accent-color);
-            margin: 10px 0 18px 0;
+            margin: 5px 0 15px 0;
+        }
+
+        /* 🍄 菇菇卡片樣式 */
+        .mushroom-card-img {
+            width: 100%;
+            max-width: 320px;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            margin: 10px auto 20px auto;
+            display: block;
         }
 
         .mushroom-title {
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             font-weight: bold;
             color: #2d5a27;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
+            text-align: left;
         }
 
         .service-box {
@@ -286,15 +297,18 @@
 
     <div class="result-card" id="result-section">
         <h2>🎉 測驗完成！</h2>
-        <div style="margin-top: 10px; color: #555;">你的心理養分指數 (WEMWBS 總分)：</div>
+        <div style="margin-top: 8px; color: #555;">你的心理養分指數 (沃里克愛丁堡心理健康量表 總分)：</div>
         <div class="result-score" id="total-score">0 / 70</div>
 
+        <!-- 🍄 顯示對應菇菇卡圖片的地方 -->
+        <img id="mushroom-card-image" class="mushroom-card-img" src="" alt="菇菇卡片">
+
         <div class="mushroom-title" id="mushroom-name">分析中...</div>
-        <p id="mushroom-desc" style="text-align: left; font-size: 0.95rem; color: #444; line-height: 1.6;"></p>
+        <p id="mushroom-desc" style="text-align: left; font-size: 0.9rem; color: #444; line-height: 1.6;"></p>
 
         <div class="service-box">
-            <h3 style="margin-top:0; color: var(--accent-color); font-size: 1rem; margin-bottom: 8px;">🤝 建議尋找的【同行菇】與服務：</h3>
-            <div id="companion-info" style="font-size: 0.9rem; line-height: 1.6; color: #444;"></div>
+            <h3 style="margin-top:0; color: var(--accent-color); font-size: 0.95rem; margin-bottom: 8px;">🤝 建議尋找的【同行菇】與服務：</h3>
+            <div id="companion-info" style="font-size: 0.88rem; line-height: 1.6; color: #444;"></div>
         </div>
 
         <button onclick="location.reload()" style="margin-top: 22px; padding: 10px 24px; background: #466b5d; color: white; border: none; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer;">重新測驗</button>
@@ -304,7 +318,6 @@
 <script>
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxPboMfvFFOP9EO6_dNrCMdT1O7z_LY_bemNcU7yLt6XpApFSyGF0bifn8Bzv4-PoGm/exec";
 
-    // 🌟 沃里克愛丁堡心理健康量表 (WEMWBS) 指定中文 5 分 Likert 選項 🌟
     const wemwbsStandardOptions = [
         { text: "1 分：完全沒有", score: 1 },
         { text: "2 分：很少有", score: 2 },
@@ -330,7 +343,6 @@
         { title: "【第 14 題】", scenario: "我覺得愉快、開朗", options: wemwbsStandardOptions }
     ];
 
-    // 🌟 第 15 題：50 個詞語陣列 (10 列 x 5 行) 🌟
     const gridWords = [
         ["堅韌", "奉獻", "擔當", "蓄力", "守護", "硬淨", "希望", "沉澱", "溫暖", "微光"],
         ["雲芝", "豐沛", "創作", "多元", "內斂", "親切", "優雅", "包容", "連結", "日常"],
@@ -339,7 +351,6 @@
         ["獨處", "典雅", "堅持", "自主", "隨和", "幸運", "靈活", "順從", "黏人", "親密"]
     ];
 
-    // 🌟 10 種菇菇專屬詞語權重設定 (主權重 +2，副權重 +1) 🌟
     const wordWeights = {
         "堅韌": { main: "靈芝", sub: "夜光菇" }, "奉獻": { main: "靈芝", sub: "雞腿菇" }, "擔當": { main: "靈芝", sub: "猴頭菇" }, "蓄力": { main: "靈芝", sub: "夜光菇" }, "守護": { main: "靈芝", sub: "金針菇" },
         "雲芝": { main: "雲芝", sub: "竹笙" }, "豐沛": { main: "雲芝", sub: "蘑菇" }, "創作": { main: "雲芝", sub: "猴頭菇" }, "多元": { main: "雲芝", sub: "竹笙" }, "內斂": { main: "雲芝", sub: "松茸" }, "靈感": { main: "雲芝", sub: "猴頭菇" },
@@ -360,7 +371,6 @@
     function initQuiz() {
         const container = document.getElementById('questions-container');
 
-        // 渲染前 14 題 WEMWBS
         questions.forEach((q, idx) => {
             const card = document.createElement('div');
             card.className = `question-card ${idx === 0 ? 'active' : ''}`;
@@ -378,7 +388,6 @@
             container.appendChild(card);
         });
 
-        // 渲染第 15 題 (網格詞語選取題)
         const q15Card = document.createElement('div');
         q15Card.className = 'question-card';
         q15Card.id = `q-14`;
@@ -461,7 +470,6 @@
             "雞腿菇": 0, "猴頭菇": 0, "竹笙": 0, "雲芝": 0, "夜光菇": 0
         };
 
-        // 1. WEMWBS 基礎分數區間加權 (+5 分)
         if (totalWemwbs <= 18) mushroomScores["木耳"] += 5;
         else if (totalWemwbs <= 23) mushroomScores["靈芝"] += 5;
         else if (totalWemwbs <= 28) mushroomScores["松茸"] += 5;
@@ -473,7 +481,6 @@
         else if (totalWemwbs <= 61) mushroomScores["雲芝"] += 5;
         else mushroomScores["夜光菇"] += 5;
 
-        // 2. 第 15 題詞語主權重 (+2) 與副權重 (+1)
         selectedWords.forEach(w => {
             if (wordWeights[w]) {
                 const mainMushroom = wordWeights[w].main;
@@ -483,7 +490,6 @@
             }
         });
 
-        // 3. 判定最高分菇菇
         let finalMushroom = "木耳";
         let maxScore = -1;
         for (let m in mushroomScores) {
@@ -497,61 +503,75 @@
         document.getElementById('result-section').style.display = 'block';
         document.getElementById('total-score').innerText = `${totalWemwbs} / 70`;
 
+        // 🌟 10 種菇菇卡片資料庫 (包含對應圖檔 image 檔名) 🌟
         const mushroomData = {
-            "木耳": {
-                name: "👂 木耳 (傾聽型)",
-                desc: "特質：共感敏銳、善於傾聽、情緒容器、適時卸載。你擁有極佳的同理心與包容力，但也因過度吸收他人的感受而需要空間淨化。",
-                companion: "<b>🕊️【找】藝術治療 / 照顧者舒壓</b><br>你需要一雙溫柔的耳朵，專注聽你講述自己的故事，透過創作清空心靈負擔。"
-            },
             "靈芝": {
-                name: "🪵 靈芝 (修復型)",
+                name: "你的菇菇類型：🔍 靈芝 (修復型)",
+                image: "靈芝.jpg", // 請確保同資料夾內有這張圖片檔
                 desc: "特質：堅韌擔當、默默守護、外剛內柔、記得愛己。你是大家可靠的後盾，但在展現強大保護力的同時，也別忘了溫柔對待自己。",
                 companion: "<b>🫖【家】照顧者舒壓工作坊</b><br>給自己一段純粹放鬆的喘息時間，你有保護別人的硬殼，但也需要被溫柔滋養。"
             },
+            "雞腿菇": {
+                name: "你的菇菇類型：🔍 雞腿菇 (和諧型)",
+                image: "雞腿菇.jpg",
+                desc: "特質：溫暖體貼、氣氛調和、重視團隊、回應自我。你是大家心中的開心果與暖心存在，照顧團隊之餘，也請重視自己的真實感受。",
+                companion: "<b>💬【社】朋輩支援與興趣班</b><br>結識志同道合的新朋友，照顧大家的同時，別忘了問問自己：今天開心嗎？為自己而創作。"
+            },
+            "木耳": {
+                name: "你的菇菇類型：🔍 木耳 (傾聽型)",
+                image: "木耳.jpg",
+                desc: "特質：共感敏銳、善於傾聽、情緒容器、適時卸載。你擁有極佳的同理心與包容力，但也因過度吸收他人的感受而需要空間淨化。",
+                companion: "<b>🕊️【找】藝術治療 / 照顧者舒壓</b><br>你需要一雙溫柔的耳朵，專注聽你講述自己的故事，透過創作清空心靈負擔。"
+            },
             "松茸": {
-                name: "🌲 松茸 (獨立型)",
+                name: "你的菇菇類型：🔍 松茸 (獨立型)",
+                image: "松茸.jpg",
                 desc: "特質：獨特自主、專注內在、堅持原則、尋求共鳴。你享受獨處並保有深刻的個人風格，有時渴望找到能真正理解你頻率的人。",
                 companion: "<b>🕊️【找】藝術治療</b><br>在一對一或小組陪伴的安靜空間裡梳理內心情緒，你的獨特終會吸引懂得你的人。"
             },
             "蘑菇": {
-                name: "🍄 蘑菇 (穩健型)",
+                name: "你的菇菇類型：🔍 蘑菇 (穩健型)",
+                image: "蘑菇.jpg",
                 desc: "特質：踏實沉穩、日常生活、包容平靜、期待驚喜。你在平凡日常中展現韌性與安定感，偶爾也渴望在規律中添入趣味與色彩。",
                 companion: "<b>🎨【找】多元藝術體驗</b><br>在日常中加一點手藝與音樂，平凡的日常裡，藝術能為你揉進一點甜與色彩。"
             },
             "金針菇": {
-                name: "🥤 金針菇 (緊密型)",
+                name: "你的菇菇類型：🔍 金針菇 (緊密型)",
+                image: "金針菇.jpg",
                 desc: "特質：重情重義、情感投入、界限探索、適度空間。你極度珍惜人際連結與親密感，學習在深情陪伴與個人空間中取得平衡。",
                 companion: "<b>👨‍👩‍👧‍👦【家】家庭與伴侶支援</b><br>保持舒適的距離能讓愛更有呼吸感，找到讓彼此都舒服的和諧界線。"
             },
-            "雞腿菇": {
-                name: "🔍 雞腿菇 (和諧型)",
-                desc: "特質：溫暖體貼、氣氛調和、重視團隊、回應自我。你是大家心中的開心果與暖心存在，照顧團隊之餘，也請重視自己的真實感受。",
-                companion: "<b>💬【社】朋輩支援與興趣班</b><br>結識志同道合的新朋友，照顧大家的同時，別忘了問問自己：今天開心嗎？為自己而創作。"
-            },
             "猴頭菇": {
-                name: "💡 猴頭菇 (探索型)",
+                name: "你的菇菇類型：🔍 猴頭菇 (探索型)",
+                image: "猴頭菇.jpg",
                 desc: "特質：深遠思考、追求意義、人生轉折、沉澱前行。你對生活有深刻的領悟與求知欲，目前正在梳理方向，轉化經驗為成長養分。",
                 companion: "<b>🌱【找】生命教育</b><br>探索生涯規劃與自我認識，思考是成長的養分，每個階段都有獨特風景。"
             },
             "竹笙": {
-                name: "☂️ 竹笙 (開放型)",
+                name: "你的菇菇類型：🔍 竹笙 (開放型)",
+                image: "竹笙.jpg",
                 desc: "特質：渴望共融、跨界連結、擁抱多樣、拓展視野。你懷抱對世界的好奇心，期待跨出既有圈子，建立更豐富的社群互動。",
                 companion: "<b>👴👶【社】跨時代共融活動</b><br>張開擁抱世界的網，以藝術為橋，促進不同年齡層的交流與連結。"
             },
             "雲芝": {
-                name: "🌐 雲芝 (潛能型)",
+                name: "你的菇菇類型：🔍 雲芝 (潛能型)",
+                image: "雲芝.jpg",
                 desc: "特質：靈感豐富、感官敏銳、蓄勢待發、期待綻放。你內心深藏著多元的創作能量，正在等待合適的契機與舞台徹底發揮。",
                 companion: "<b>🎨【找】多元藝術體驗</b><br>透過視覺藝術、音樂或寫作遇見不一樣的自己，你的潛能比想像中更豐富。"
             },
             "夜光菇": {
-                name: "✨ 夜光菇 (沉靜型)",
+                name: "你的菇菇類型：🔍 夜光菇 (沉靜型)",
+                image: "夜光菇.jpg",
                 desc: "特質：蓄能沉澱、逆境韌性、內在溫暖、照亮他人。即便面對挑戰也能保有內在光芒，在安靜沉澱中積蓄能量，溫暖身邊的人。",
                 companion: "<b>❤️【社】藝術義工培訓</b><br>將自己的微光轉化為力量，關懷社區有需要的人，照亮自己與他人。"
             }
         };
 
         const res = mushroomData[finalMushroom];
-        document.getElementById('mushroom-name').innerText = `你的菇菇類型：${res.name}`;
+        
+        // 替換圖檔與內文
+        document.getElementById('mushroom-card-image').src = res.image;
+        document.getElementById('mushroom-name').innerText = res.name;
         document.getElementById('mushroom-desc').innerText = res.desc;
         document.getElementById('companion-info').innerHTML = res.companion;
 
@@ -559,7 +579,7 @@
     }
 
     function sendToGoogleSheets(totalScore, mushroomType, words) {
-        if (GOOGLE_SCRIPT_URL === "YOUR_GOOGLE_APP_SCRIPT_WEBHOOK_URL") return;
+        if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes("YOUR_GOOGLE_APP_SCRIPT")) return;
 
         const data = {
             timestamp: new Date().toLocaleString("zh-HK"),
@@ -572,12 +592,13 @@
         fetch(GOOGLE_SCRIPT_URL, {
             method: "POST",
             mode: "no-cors",
-            headers: { "Content-Type": "application/json" },
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
             body: JSON.stringify(data)
-        }).catch(err => console.log("Data send error:", err));
+        })
+        .then(() => console.log("Data sent successfully!"))
+        .catch(err => console.error("Data send error:", err));
     }
 
-    // 🌟 全版由上而下飄落螢光粒子 🌟
     const canvas = document.getElementById('particle-canvas');
     const ctx = canvas.getContext('2d');
     let particles = [];
