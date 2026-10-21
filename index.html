@@ -72,6 +72,39 @@
             font-weight: 500;
         }
 
+        /* 🍄 介紹頁面專用樣式 */
+        .intro-card {
+            text-align: center;
+            padding: 10px 5px;
+        }
+
+        .intro-img {
+            width: 100%;
+            max-width: 520px;
+            border-radius: 12px;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+            margin: 0 auto 20px auto;
+            display: block;
+        }
+
+        .start-btn {
+            padding: 12px 36px;
+            background: #466b5d;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.05rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(70, 107, 93, 0.3);
+        }
+
+        .start-btn:hover {
+            background: #365348;
+            transform: translateY(-2px);
+        }
+
         .progress-bar {
             height: 8px;
             background-color: #e0e0e0;
@@ -280,8 +313,18 @@
 <div class="container">
     <h1>《幸福感測驗×菇菇配對》</h1>
     <div class="subtitle">
-    【 14題-沃里克愛丁堡心理健康量表】<br><span style="display:inline-block; margin-left: 1.2em;">【 1題-配出你的知己菇菇】</span></div>
-    <div id="quiz-section">
+        【 14題-沃里克愛丁堡心理健康量表】<br><span style="display:inline-block; margin-left: 1.2em;">【 1題-配出你的知己菇菇】</span>
+    </div>
+
+    <!-- 🌟 0. 介紹頁區塊 🌟 -->
+    <div id="intro-section" class="intro-card">
+        <!-- 介紹頁圖檔，請確保 GitHub 有上傳 intro.jpg (若為 png 可自行修改檔名) -->
+        <img src="intro.jpg" alt="測驗介紹" class="intro-img">
+        <button class="start-btn" onclick="startQuiz()">開始測驗</button>
+    </div>
+
+    <!-- 🌟 1. 測驗問題區塊 🌟 -->
+    <div id="quiz-section" style="display: none;">
         <div class="progress-bar">
             <div class="progress" id="progress"></div>
         </div>
@@ -295,9 +338,10 @@
         </div>
     </div>
 
+    <!-- 🌟 2. 測驗結果區塊 🌟 -->
     <div class="result-card" id="result-section">
         <h2>🎉 測驗完成！</h2>
-        <div style="margin-top: 8px; color: #555;">你的幸福感指數<br><span style="display:inline-block; margin-left: 1.2em;"> (沃里克愛丁堡心理健康量表 總分)：</div>
+        <div style="margin-top: 8px; color: #555;">你的幸福感指數<br><span style="display:inline-block; margin-left: 1.2em;"> (沃里克愛丁堡心理健康量表 總分)：</span></div>
         <div class="result-score" id="total-score">0 / 70</div>
 
         <!-- 🍄 顯示對應菇菇卡圖片的地方 -->
@@ -367,6 +411,12 @@
     let currentQ = 0;
     let answers = new Array(questions.length).fill(0);
     let selectedWords = [];
+
+    // 🌟 開始測驗按鈕邏輯 🌟
+    function startQuiz() {
+        document.getElementById('intro-section').style.display = 'none';
+        document.getElementById('quiz-section').style.display = 'block';
+    }
 
     function initQuiz() {
         const container = document.getElementById('questions-container');
@@ -503,11 +553,11 @@
         document.getElementById('result-section').style.display = 'block';
         document.getElementById('total-score').innerText = `${totalWemwbs} / 70`;
 
-        // 🌟 10 種菇菇卡片資料庫 (包含對應圖檔 image 檔名) 🌟
+        // 🌟 10 種菇菇卡片資料庫 (英文拼音檔名) 🌟
         const mushroomData = {
             "靈芝": {
                 name: "您的知己菇菇：🔍 靈芝 (修復型)",
-                image: "lingji.jpg", // 請確保同資料夾內有這張圖片檔
+                image: "lingji.jpg",
                 desc: "特質：堅韌擔當、默默守護、外剛內柔、愛人愛己。具備強大的保護力與支持力，對自己與身邊的人都要同樣地溫柔~",
                 companion: "<b>🫖【家】照顧者舒壓工作坊</b><br>給自己一段純粹放鬆的喘息時間。"
             },
@@ -569,7 +619,6 @@
 
         const res = mushroomData[finalMushroom];
         
-        // 替換圖檔與內文
         document.getElementById('mushroom-card-image').src = res.image;
         document.getElementById('mushroom-name').innerText = res.name;
         document.getElementById('mushroom-desc').innerText = res.desc;
