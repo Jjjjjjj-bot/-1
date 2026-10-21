@@ -279,4 +279,448 @@
         }
 
         /* 🍄 菇菇卡片樣式 */
-        .mushroom-card-img
+        .mushroom-card-img {
+            width: 100%;
+            max-width: 320px;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            margin: 10px auto 20px auto;
+            display: block;
+        }
+
+        .mushroom-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #2d5a27;
+            margin-bottom: 10px;
+            text-align: left;
+        }
+
+        .service-box {
+            background: #fffafa;
+            border: 1.5px dashed var(--accent-color);
+            padding: 16px;
+            border-radius: 12px;
+            margin-top: 20px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+
+<canvas id="particle-canvas"></canvas>
+
+<div class="container">
+    <h1>《幸福感測驗×菇菇配對》</h1>
+    <div class="subtitle">
+        【 14題-沃里克愛丁堡心理健康量表】<br><span style="display:inline-block; margin-left: 1.2em;">【 1題-配出你的知己菇菇】</span>
+    </div>
+
+    <!-- 🌟 1. 測驗區塊 🌟 -->
+    <div id="quiz-section">
+        <div class="progress-bar">
+            <div class="progress" id="progress"></div>
+        </div>
+
+        <div id="questions-container"></div>
+
+        <div class="btn-group">
+            <button class="nav-btn" id="prev-btn" onclick="prevQuestion()" disabled>上一題</button>
+            <span id="page-num" style="align-self: center; font-size: 0.85rem; color:#666;">1 / 15</span>
+            <button class="submit-btn" id="submit-btn" style="display:none;" onclick="calculateResult()" disabled>完成提交</button>
+        </div>
+    </div>
+
+    <!-- 🌟 2. 測驗結果區塊 🌟 -->
+    <div class="result-card" id="result-section">
+        <h2>🎉 測驗完成！</h2>
+        <div style="margin-top: 8px; color: #555;">你的幸福感指數<br><span style="display:inline-block; margin-left: 1.2em;"> (沃里克愛丁堡心理健康量表 總分)：</span></div>
+        <div class="result-score" id="total-score">0 / 70</div>
+
+        <!-- 🍄 顯示對應菇菇卡圖片的地方 -->
+        <img id="mushroom-card-image" class="mushroom-card-img" src="" alt="菇菇卡片">
+
+        <div class="mushroom-title" id="mushroom-name">配對中...</div>
+        <p id="mushroom-desc" style="text-align: left; font-size: 0.9rem; color: #444; line-height: 1.6;"></p>
+
+        <div class="service-box">
+            <h3 style="margin-top:0; color: var(--accent-color); font-size: 0.95rem; margin-bottom: 8px;">🤝本中心相關的服務：</h3>
+            <div id="companion-info" style="font-size: 0.88rem; line-height: 1.6; color: #444;"></div>
+        </div>
+
+        <button onclick="location.reload()" style="margin-top: 22px; padding: 10px 24px; background: #466b5d; color: white; border: none; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer;">重新測驗</button>
+    </div>
+</div>
+
+<script>
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxPboMfvFFOP9EO6_dNrCMdT1O7z_LY_bemNcU7yLt6XpApFSyGF0bifn8Bzv4-PoGm/exec";
+
+    const wemwbsStandardOptions = [
+        { text: "1 分：完全沒有", score: 1 },
+        { text: "2 分：很少有", score: 2 },
+        { text: "3 分：有時有", score: 3 },
+        { text: "4 分：經常有", score: 4 },
+        { text: "5 分：總是有", score: 5 }
+    ];
+
+    const questions = [
+        { title: "【第 1 題】", scenario: "我對未來感到樂觀", options: wemwbsStandardOptions },
+        { title: "【第 2 題】", scenario: "我覺得自己是個有用的人", options: wemwbsStandardOptions },
+        { title: "【第 3 題】", scenario: "我覺得放鬆", options: wemwbsStandardOptions },
+        { title: "【第 4 題】", scenario: "我對其他人感興趣", options: wemwbsStandardOptions },
+        { title: "【第 5 題】", scenario: "我有充沛的精力", options: wemwbsStandardOptions },
+        { title: "【第 6 題】", scenario: "我能很好地處理問題", options: wemwbsStandardOptions },
+        { title: "【第 7 題】", scenario: "我的思緒清晰", options: wemwbsStandardOptions },
+        { title: "【第 8 題】", scenario: "我對自己感到滿意", options: wemwbsStandardOptions },
+        { title: "【第 9 題】", scenario: "我覺得自己與他人親近", options: wemwbsStandardOptions },
+        { title: "【第 10 題】", scenario: "我覺得有自信", options: wemwbsStandardOptions },
+        { title: "【第 11 題】", scenario: "我能獨立做決定", options: wemwbsStandardOptions },
+        { title: "【第 12 題】", scenario: "我覺得自己被愛", options: wemwbsStandardOptions },
+        { title: "【第 13 題】", scenario: "我對新事物感興趣", options: wemwbsStandardOptions },
+        { title: "【第 14 題】", scenario: "我覺得愉快、開朗", options: wemwbsStandardOptions }
+    ];
+
+    const gridWords = [
+        ["堅韌", "奉獻", "擔當", "可靠", "守護", "堅毅", "希望", "沉靜", "溫暖", "溫柔"],
+        ["敏銳", "豐沛", "創作", "多元", "內斂", "親切", "優雅", "包容", "連結", "實在"],
+        ["靈感", "睿智", "探索", "成長", "遠見", "體貼", "踏實", "百搭", "大方", "融洽"],
+        ["深思", "顧家", "牽絆", "陪伴", "獨立", "幽默", "盡興", "彈性", "傾聽", "共情"],
+        ["獨處", "典雅", "堅持", "自主", "隨和", "幸運", "靈活", "順從", "黏人", "親密"]
+    ];
+
+    const wordWeights = {
+        "堅韌": { main: "靈芝", sub: "夜光菇" }, "奉獻": { main: "靈芝", sub: "雞腿菇" }, "擔當": { main: "靈芝", sub: "猴頭菇" }, "可靠": { main: "靈芝", sub: "夜光菇" }, "守護": { main: "靈芝", sub: "金針菇" },
+        "敏銳": { main: "雲芝", sub: "竹笙" }, "豐沛": { main: "雲芝", sub: "蘑菇" }, "創作": { main: "雲芝", sub: "猴頭菇" }, "多元": { main: "雲芝", sub: "竹笙" }, "內斂": { main: "雲芝", sub: "松茸" }, "靈感": { main: "雲芝", sub: "猴頭菇" },
+        "睿智": { main: "猴頭菇", sub: "松茸" }, "探索": { main: "猴頭菇", sub: "竹笙" }, "成長": { main: "猴頭菇", sub: "靈芝" }, "遠見": { main: "猴頭菇", sub: "雲芝" }, "深思": { main: "猴頭菇", sub: "松茸" },
+        "顧家": { main: "金針菇", sub: "靈芝" }, "牽絆": { main: "金針菇", sub: "木耳" }, "陪伴": { main: "金針菇", sub: "雞腿菇" }, "黏人": { main: "金針菇", sub: "木耳" }, "親密": { main: "金針菇", sub: "竹笙" },
+        "獨立": { main: "松茸", sub: "猴頭菇" }, "獨處": { main: "松茸", sub: "夜光菇" }, "典雅": { main: "松茸", sub: "竹笙" }, "堅持": { main: "松茸", sub: "靈芝" }, "自主": { main: "松茸", sub: "猴頭菇" },
+        "體貼": { main: "雞腿菇", sub: "木耳" }, "幽默": { main: "雞腿菇", sub: "蘑菇" }, "隨和": { main: "雞腿菇", sub: "蘑菇" }, "幸運": { main: "雞腿菇", sub: "竹笙" }, "靈活": { main: "雞腿菇", sub: "雲芝" },
+        "堅毅": { main: "夜光菇", sub: "靈芝" }, "希望": { main: "夜光菇", sub: "猴頭菇" }, "沉靜": { main: "夜光菇", sub: "松茸" }, "溫暖": { main: "夜光菇", sub: "雞腿菇" }, "溫柔": { main: "夜光菇", sub: "木耳" },
+        "親切": { main: "竹笙", sub: "雞腿菇" }, "優雅": { main: "竹笙", sub: "松茸" }, "連結": { main: "竹笙", sub: "金針菇" }, "大方": { main: "竹笙", sub: "雲芝" },
+        "包容": { main: "蘑菇", sub: "木耳" }, "實在": { main: "蘑菇", sub: "雞腿菇" }, "踏實": { main: "蘑菇", sub: "靈芝" }, "百搭": { main: "蘑菇", sub: "雞腿菇" },"融洽": { main: "蘑菇", sub: "雞腿菇" },
+        "盡興": { main: "木耳", sub: "雲芝" }, "彈性": { main: "木耳", sub: "雞腿菇" }, "傾聽": { main: "木耳", sub: "金針菇" }, "共情": { main: "木耳", sub: "竹笙" }, "順從": { main: "木耳", sub: "金針菇" }
+    };
+
+    let currentQ = 0;
+    let answers = new Array(questions.length).fill(0);
+    let selectedWords = [];
+
+    function initQuiz() {
+        const container = document.getElementById('questions-container');
+
+        // 渲染前 14 題 WEMWBS
+        questions.forEach((q, idx) => {
+            const card = document.createElement('div');
+            card.className = `question-card ${idx === 0 ? 'active' : ''}`;
+            card.id = `q-${idx}`;
+
+            card.innerHTML = `
+                <div class="question-title">${q.title}</div>
+                <div class="scenario">「${q.scenario}」<br><span style="font-size:0.8rem; color:#666; font-weight:normal;">(請回想過去兩週內，這個描述符合你的情況)</span></div>
+                <div class="options">
+                    ${q.options.map((opt) => `
+                        <button class="option-btn" onclick="selectOption(${idx}, ${opt.score})">${opt.text}</button>
+                    `).join('')}
+                </div>
+            `;
+            container.appendChild(card);
+        });
+
+        // 🌟 插入第 14 題之後的「過渡介紹頁卡片」 (Card Index = 14) 🌟
+        const introCard = document.createElement('div');
+        introCard.className = 'question-card';
+        introCard.id = `q-14`;
+        introCard.innerHTML = `
+            <div class="intro-card">
+                <img src="intro.jpg" alt="配對介紹" class="intro-img">
+                <button class="start-btn" onclick="nextToQ15()">開始配對</button>
+            </div>
+        `;
+        container.appendChild(introCard);
+
+        // 🌟 渲染第 15 題 (網格詞語選取題) (Card Index = 15) 🌟
+        const q15Card = document.createElement('div');
+        q15Card.className = 'question-card';
+        q15Card.id = `q-15`;
+
+        let gridHtml = `<div class="question-title">【第 15 題：配對你的知己菇菇！】</div>`;
+        gridHtml += `<div class="scenario">憑你的直覺在以下的詞語庫中選擇 <b>10 個</b>能代表你的字詞</div>`;
+        gridHtml += `<div class="word-counter" id="word-counter">已選擇：0 / 10 個字詞</div>`;
+        gridHtml += `<div class="words-grid-container"><table class="words-table">`;
+
+        for (let r = 0; r < 5; r++) {
+            gridHtml += `<tr>`;
+            for (let c = 0; c < 10; c++) {
+                const word = gridWords[r][c];
+                gridHtml += `<td onclick="toggleWord(this, '${word}')"><span class="vertical-text">${word}</span></td>`;
+            }
+            gridHtml += `</tr>`;
+        }
+        gridHtml += `</table></div>`;
+
+        q15Card.innerHTML = gridHtml;
+        container.appendChild(q15Card);
+
+        updateUI();
+    }
+
+    function toggleWord(tdElem, word) {
+        const idx = selectedWords.indexOf(word);
+        if (idx > -1) {
+            selectedWords.splice(idx, 1);
+            tdElem.classList.remove('selected');
+        } else {
+            if (selectedWords.length < 10) {
+                selectedWords.push(word);
+                tdElem.classList.add('selected');
+            } else {
+                alert("你已經選擇了 10 個字詞！如需替換，請先取消點選已選的字詞。");
+            }
+        }
+        document.getElementById('word-counter').innerText = `已選擇：${selectedWords.length} / 10 個字詞`;
+        document.getElementById('submit-btn').disabled = (selectedWords.length !== 10);
+    }
+
+    function selectOption(qIdx, score) {
+        answers[qIdx] = score;
+        if (currentQ < 14) {
+            currentQ++;
+            updateUI();
+        }
+    }
+
+    // 點擊過渡頁的「開始配對」按鈕前進到第 15 題
+    function nextToQ15() {
+        currentQ = 15;
+        updateUI();
+    }
+
+    function prevQuestion() {
+        if (currentQ > 0) {
+            currentQ--;
+            updateUI();
+        }
+    }
+
+    function updateUI() {
+        document.querySelectorAll('.question-card').forEach((card, idx) => {
+            card.classList.toggle('active', idx === currentQ);
+        });
+
+        document.getElementById('prev-btn').disabled = (currentQ === 0);
+
+        // 頁碼顯示處理 (前14題顯示 1~14 / 15，過渡頁隱藏頁碼，第15題顯示 15 / 15)
+        if (currentQ < 14) {
+            document.getElementById('page-num').style.visibility = 'visible';
+            document.getElementById('page-num').innerText = `${currentQ + 1} / 15`;
+            document.getElementById('progress').style.width = `${((currentQ + 1) / 15) * 100}%`;
+            document.getElementById('prev-btn').style.display = 'inline-block';
+        } else if (currentQ === 14) {
+            // 過渡頁：隱藏導覽按鈕與頁碼，讓介面更乾淨
+            document.getElementById('page-num').style.visibility = 'hidden';
+            document.getElementById('prev-btn').style.display = 'inline-block';
+            document.getElementById('progress').style.width = `93%`;
+        } else if (currentQ === 15) {
+            document.getElementById('page-num').style.visibility = 'visible';
+            document.getElementById('page-num').innerText = `15 / 15`;
+            document.getElementById('progress').style.width = `100%`;
+            document.getElementById('prev-btn').style.display = 'inline-block';
+        }
+
+        // 只有在最後第 15 題時顯示「完成提交」按鈕
+        if (currentQ === 15) {
+            document.getElementById('submit-btn').style.display = 'block';
+            document.getElementById('submit-btn').disabled = (selectedWords.length !== 10);
+        } else {
+            document.getElementById('submit-btn').style.display = 'none';
+        }
+    }
+
+    function calculateResult() {
+        const totalWemwbs = answers.reduce((a, b) => a + b, 0);
+
+        let mushroomScores = {
+            "木耳": 0, "靈芝": 0, "松茸": 0, "蘑菇": 0, "金針菇": 0,
+            "雞腿菇": 0, "猴頭菇": 0, "竹笙": 0, "雲芝": 0, "夜光菇": 0
+        };
+
+        if (totalWemwbs <= 18) mushroomScores["木耳"] += 5;
+        else if (totalWemwbs <= 23) mushroomScores["靈芝"] += 5;
+        else if (totalWemwbs <= 28) mushroomScores["松茸"] += 5;
+        else if (totalWemwbs <= 32) mushroomScores["蘑菇"] += 5;
+        else if (totalWemwbs <= 37) mushroomScores["金針菇"] += 5;
+        else if (totalWemwbs <= 42) mushroomScores["雞腿菇"] += 5;
+        else if (totalWemwbs <= 47) mushroomScores["猴頭菇"] += 5;
+        else if (totalWemwbs <= 52) mushroomScores["竹笙"] += 5;
+        else if (totalWemwbs <= 61) mushroomScores["雲芝"] += 5;
+        else mushroomScores["夜光菇"] += 5;
+
+        selectedWords.forEach(w => {
+            if (wordWeights[w]) {
+                const mainMushroom = wordWeights[w].main;
+                const subMushroom = wordWeights[w].sub;
+                if (mushroomScores[mainMushroom] !== undefined) mushroomScores[mainMushroom] += 2;
+                if (mushroomScores[subMushroom] !== undefined) mushroomScores[subMushroom] += 1;
+            }
+        });
+
+        let finalMushroom = "木耳";
+        let maxScore = -1;
+        for (let m in mushroomScores) {
+            if (mushroomScores[m] > maxScore) {
+                maxScore = mushroomScores[m];
+                finalMushroom = m;
+            }
+        }
+
+        document.getElementById('quiz-section').style.display = 'none';
+        document.getElementById('result-section').style.display = 'block';
+        document.getElementById('total-score').innerText = `${totalWemwbs} / 70`;
+
+        // 🌟 10 種菇菇卡片資料庫 (拼音檔名) 🌟
+        const mushroomData = {
+            "靈芝": {
+                name: "您的知己菇菇：🔍 靈芝 (修復型)",
+                image: "lingji.jpg",
+                desc: "特質：堅韌擔當、默默守護、外剛內柔、愛人愛己。具備強大的保護力與支持力，對自己與身邊的人都要同樣地溫柔~",
+                companion: "<b>🫖【家】照顧者舒壓工作坊</b><br>給自己一段純粹放鬆的喘息時間。"
+            },
+            "雞腿菇": {
+                name: "您的知己菇菇：🔍 雞腿菇 (和諧型)",
+                image: "gaibea.jpg",
+                desc: "特質：溫暖體貼、氣氛調和、重視團隊、回應自我。你是大家心中的開心果與暖心存在，照顧團隊之餘，自己的真實感受也很值得重視喔~",
+                companion: "<b>💬【社】朋輩支援與興趣班</b><br>結識志同道合的新朋友，為自己而創作"
+            },
+            "木耳": {
+                name: "您的知己菇菇：🔍 木耳 (傾聽型)",
+                image: "mukyee.jpg",
+                desc: "特質：共感敏銳、善於傾聽、善於共情。你擁有極佳的同理心與包容力，偶爾找個私密空間來沉澱與充電也很不錯呢~",
+                companion: "<b>🕊️【我】藝術治療 / 照顧者舒壓</b><br>透過五感創作清空心靈垃圾，重獲平靜。"
+            },
+            "松茸": {
+                name: "您的知己菇菇：🔍 松茸 (獨立型)",
+                image: "congyong.jpg",
+                desc: "特質：獨特自主、專注內在、堅持原則、尋求共鳴。你享受獨處並保有深刻的個人風格，有位真正理解你頻率的人也好像很不錯呢~",
+                companion: "<b>🕊️【我】藝術治療</b><br>一對一或小組陪伴，在安靜的空間裡梳理內心情緒。"
+            },
+            "蘑菇": {
+                name: "您的知己菇菇：🔍 蘑菇 (穩健型)",
+                image: "morgu.jpg",
+                desc: "特質：沉穩、日常生活、包容平靜、期待驚喜。你在平凡日常中展現韌性與安定感，偶爾在規律中添入趣味與色彩也是個好主意呢。",
+                companion: "<b>🎨【我】多元藝術體驗</b><br>在日常中加一點手藝與音樂，找回生活的樂趣。"
+            },
+            "金針菇": {
+                name: "您的知己菇菇：🔍 金針菇 (緊密型)",
+                image: "gumjum.jpg",
+                desc: "特質：重情重義、情感投入、界限探索、給予自由呼吸感。你極度珍惜人際連結與親密感，在深情陪伴與個人空間中學習取得平衡也是個好主意呢。",
+                companion: "<b>👨‍👩‍👧‍👦【家】家庭與伴侶支援</b><br>在色彩與創作中增進理解，找回舒壓的平衡。"
+            },
+            "猴頭菇": {
+                name: "您的知己菇菇：🔍 猴頭菇 (探索型)",
+                image: "houtao.jpg",
+                desc: "特質：深遠思考、追求意義、擁抱變化、穩步前行。你對生活有深刻的領悟與求知欲，目前正在梳理方向，轉化經驗為成長養分。",
+                companion: "<b>🌱【我】生命教育</b><br>探索生涯規劃、自我認識，從容應對人生新課題。"
+            },
+            "竹笙": {
+                name: "您的知己菇菇：🔍 竹笙 (開放型)",
+                image: "chukseng.jpg",
+                desc: "特質：渴望共融、跨界連結、擁抱多樣、拓展視野。你懷抱對世界的好奇心，期待跨出既有圈子，建立更豐富的社群互動。",
+                companion: "<b>👴👶【社】跨時代共融活動</b><br>以藝術為橋，促進不同年齡層的交流與連結。"
+            },
+            "雲芝": {
+                name: "您的知己菇菇：🔍 雲芝 (潛能型)",
+                image: "wenji.jpg",
+                desc: "特質：靈感豐富、感官敏銳、蓄勢待發、期待綻放。你內心深藏著多元的創作能量，正在等待合適的契機與舞台徹底發揮。",
+                companion: "<b>🎨【我】多元藝術體驗</b><br>透過視覺藝術、音樂或寫作遇見不一樣的自己，你的潛能比想像中更豐富。"
+            },
+            "夜光菇": {
+                name: "您的知己菇菇：🔍 夜光菇 (沉靜型)",
+                image: "yeakwong.jpg",
+                desc: "特質：蓄能沉澱、逆境韌性、內在溫暖、照亮他人。即便面對挑戰也能保有內在光芒，在安靜沉澱中積蓄能量，溫暖身邊的人。",
+                companion: "<b>❤️【社】藝術義工培訓</b><br>將自己的微光轉化為力量，關懷社區有需要的人。"
+            }
+        };
+
+        const res = mushroomData[finalMushroom];
+        
+        document.getElementById('mushroom-card-image').src = res.image;
+        document.getElementById('mushroom-name').innerText = res.name;
+        document.getElementById('mushroom-desc').innerText = res.desc;
+        document.getElementById('companion-info').innerHTML = res.companion;
+
+        sendToGoogleSheets(totalWemwbs, res.name, selectedWords.join(","));
+    }
+
+    function sendToGoogleSheets(totalScore, mushroomType, words) {
+        if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes("YOUR_GOOGLE_APP_SCRIPT")) return;
+
+        const data = {
+            timestamp: new Date().toLocaleString("zh-HK"),
+            totalScore: totalScore,
+            mushroomType: mushroomType,
+            selectedWords: words,
+            answers: answers.slice(0, 14).join(",")
+        };
+
+        fetch(GOOGLE_SCRIPT_URL, {
+            method: "POST",
+            mode: "no-cors",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify(data)
+        })
+        .then(() => console.log("Data sent successfully!"))
+        .catch(err => console.error("Data send error:", err));
+    }
+
+    const canvas = document.getElementById('particle-canvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    class Particle {
+        constructor(isInitial = false) { this.reset(isInitial); }
+        reset(isInitial = false) {
+            this.x = Math.random() * canvas.width;
+            this.y = isInitial ? Math.random() * canvas.height : -10;
+            this.size = Math.random() * 3 + 1;
+            this.speedY = Math.random() * 0.8 + 0.3;
+            this.speedX = (Math.random() - 0.5) * 0.4;
+            this.alpha = Math.random() * 0.8 + 0.2;
+            this.fade = Math.random() * 0.005 + 0.002;
+        }
+        update() {
+            this.y += this.speedY;
+            this.x += this.speedX;
+            this.alpha -= this.fade;
+            if (this.alpha <= 0 || this.y > canvas.height) this.reset(false);
+        }
+        draw() {
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(255, 255, 200, ${this.alpha})`;
+            ctx.shadowBlur = 8;
+            ctx.shadowColor = "rgba(255, 255, 150, 0.9)";
+            ctx.fill();
+        }
+    }
+
+    for (let i = 0; i < 60; i++) particles.push(new Particle(true));
+
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach(p => { p.update(); p.draw(); });
+        requestAnimationFrame(animate);
+    }
+    animate();
+
+    initQuiz();
+</script>
+
+</body>
+</html>
